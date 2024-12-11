@@ -112,16 +112,23 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         user = self.request.user
+        
         if user.role == "employee":
-            allowed_fields = ['status', 'response']
-            for field in self.request.data.keys():
-                if field not in allowed_fields:
-                    raise PermissionDenied(f"Employees can only update the following fields: {allowed_fields}")
-            serializer.save()
+            # Get the current assignees of the ticket
+            assigned_to = serializer.instance.assigned_to.all()
+
+            # Add the employee who is updating the ticket to the assigned_to list, if not already assigned
+            if user not in assigned_to:
+                assigned_to = list(assigned_to)  # Convert queryset to list
+                assigned_to.append(user)
+
+            # Set the updated assigned_to field
+            serializer.save(assigned_to=assigned_to)
         elif user.role == "client":
             raise PermissionDenied("Clients cannot update tickets.")
         else:
             raise PermissionDenied("Unauthorized access.")
+
 
 
 class TicketDetailView(APIView):

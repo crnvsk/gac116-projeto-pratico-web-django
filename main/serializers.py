@@ -22,11 +22,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class TicketSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField(read_only=True)
-    assigned_to = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=User.objects.all(),
-        required=False
-    )
+    assigned_to = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Ticket
