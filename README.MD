@@ -1,4 +1,4 @@
-# Ticket Management API
+# API Sistema de Atendimento
 
 Esta API fornece um sistema de gerenciamento de tickets para clientes e funcionários gerenciarem solicitações de atendimento. Os clientes podem criar tickets, enquanto os funcionários podem atualizar os status e as respostas dos tickets.
 
