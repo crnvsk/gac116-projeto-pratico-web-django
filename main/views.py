@@ -1,11 +1,13 @@
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer, RegisterSerializer
 from rest_framework import status
+from rest_framework import viewsets, permissions
+from .serializers import UserSerializer, RegisterSerializer, TicketSerializer
+
+from .models import Ticket
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     permission_classes = [AllowAny]
@@ -93,3 +95,17 @@ class RegisterView(APIView):
             )
             return response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TicketViewSet(viewsets.ModelViewSet):
+    queryset = Ticket.objects.all().order_by('-created_at')
+    serializer_class = TicketSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    def get_permissions(self):
+        if self.action in ['create', 'list', 'retrieve']:
+            permission_classes = [permissions.IsAuthenticated]
+        else:  # For update, partial_update, delete
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
