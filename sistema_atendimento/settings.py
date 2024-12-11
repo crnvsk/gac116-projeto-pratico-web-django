@@ -44,11 +44,11 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
-    'AUTH_COOKIE': 'access_token',  # Name of the access token cookie
-    'AUTH_COOKIE_HTTP_ONLY': True, # Prevent JavaScript access to the cookie
-    'AUTH_COOKIE_SECURE': False,   # Set True for HTTPS-only
-    'AUTH_COOKIE_PATH': '/',       # Path for the cookie
-    'AUTH_COOKIE_SAMESITE': 'Lax', # SameSite setting
+    'AUTH_COOKIE': 'access_token',
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_SECURE': False,
+    'AUTH_COOKIE_PATH': '/',
+    'AUTH_COOKIE_SAMESITE': 'Lax',
 }
 
 MIDDLEWARE = [
