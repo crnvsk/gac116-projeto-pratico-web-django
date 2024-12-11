@@ -34,4 +34,30 @@ class TicketSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'status', 'response',
             'created_by', 'assigned_to', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_by', 'title', 'description', 'assigned_to', 'created_at', 'updated_at']
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
+
+    def __init__(self, *args, **kwargs):
+        # Conditionally set title and description as not required for updates
+        super().__init__(*args, **kwargs)
+
+        if self.instance:
+            self.fields['title'].required = False
+            self.fields['description'].required = False
+
+    def validate(self, data):
+        # Ensure title and description are required only during creation
+        if not self.instance:  # Only enforce validation for title and description during creation
+            if not data.get('title'):
+                raise serializers.ValidationError({"title": "This field is required."})
+            if not data.get('description'):
+                raise serializers.ValidationError({"description": "This field is required."})
+        return data
+
+    def update(self, instance, validated_data):
+        # Preserve the existing title and description if they are not provided in the request
+        if 'title' not in validated_data:
+            validated_data['title'] = instance.title
+        if 'description' not in validated_data:
+            validated_data['description'] = instance.description
+
+        return super().update(instance, validated_data)

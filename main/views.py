@@ -96,29 +96,33 @@ class RegisterView(APIView):
 
 class TicketViewSet(viewsets.ModelViewSet):
     serializer_class = TicketSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'employee':
-            return Ticket.objects.all().order_by('-created_at')
-        elif user.role == 'client':
-            return Ticket.objects.filter(created_by=user).order_by('-created_at')
-        else:
-            return Ticket.objects.none()
+        if user.role == "employee":
+            return Ticket.objects.all().order_by("-created_at")  # Employees see all tickets
+        elif user.role == "client":
+            return Ticket.objects.filter(created_by=user).order_by("-created_at")  # Clients see their tickets
+        return Ticket.objects.none()
+
+    def perform_create(self, serializer):
+        # Ensure that created_by is always set to the logged-in user
+        serializer.save(created_by=self.request.user)
 
     def perform_update(self, serializer):
         user = self.request.user
-        if user.role == 'employee':
+        if user.role == "employee":
             allowed_fields = ['status', 'response']
             for field in self.request.data.keys():
                 if field not in allowed_fields:
                     raise PermissionDenied(f"Employees can only update the following fields: {allowed_fields}")
             serializer.save()
-        elif user.role == 'client':
+        elif user.role == "client":
             raise PermissionDenied("Clients cannot update tickets.")
         else:
             raise PermissionDenied("Unauthorized access.")
+
 
 class TicketDetailView(APIView):
     permission_classes = [IsAuthenticated]
