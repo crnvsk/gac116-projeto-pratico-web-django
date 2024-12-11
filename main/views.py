@@ -101,28 +101,24 @@ class TicketViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role == "employee":
-            return Ticket.objects.all().order_by("-created_at")  # Employees see all tickets
+            return Ticket.objects.all().order_by("-created_at")
         elif user.role == "client":
-            return Ticket.objects.filter(created_by=user).order_by("-created_at")  # Clients see their tickets
+            return Ticket.objects.filter(created_by=user).order_by("-created_at")
         return Ticket.objects.none()
 
     def perform_create(self, serializer):
-        # Ensure that created_by is always set to the logged-in user
         serializer.save(created_by=self.request.user)
 
     def perform_update(self, serializer):
         user = self.request.user
         
         if user.role == "employee":
-            # Get the current assignees of the ticket
             assigned_to = serializer.instance.assigned_to.all()
 
-            # Add the employee who is updating the ticket to the assigned_to list, if not already assigned
             if user not in assigned_to:
-                assigned_to = list(assigned_to)  # Convert queryset to list
+                assigned_to = list(assigned_to)
                 assigned_to.append(user)
 
-            # Set the updated assigned_to field
             serializer.save(assigned_to=assigned_to)
         elif user.role == "client":
             raise PermissionDenied("Clients cannot update tickets.")
@@ -145,11 +141,9 @@ class TicketDetailView(APIView):
         if not ticket:
             return Response({"error": "Ticket not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Customers can delete only their own tickets
         if request.user.role == 'client' and ticket.created_by != request.user:
             return Response({"error": "You can only delete your own tickets"}, status=status.HTTP_403_FORBIDDEN)
 
-        # Employees can delete any ticket
         if request.user.role == 'employee' or ticket.created_by == request.user:
             ticket.delete()
             return Response({"message": "Ticket deleted successfully"}, status=status.HTTP_204_NO_CONTENT)

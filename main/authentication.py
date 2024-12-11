@@ -3,13 +3,11 @@ from rest_framework.exceptions import AuthenticationFailed
 
 class CookieJWTAuthentication(JWTAuthentication):
     def authenticate(self, request):
-        # Attempt to get the token from the 'Authorization' header (default behavior)
         header = self.get_header(request)
         if header is None:
-            # If no header, check for the token in the cookie
             raw_token = request.COOKIES.get('access_token')
             if not raw_token:
-                return None  # No token found
+                return None
         else:
             raw_token = self.get_raw_token(header)
 
