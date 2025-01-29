@@ -75,7 +75,18 @@ class RegisterView(APIView):
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
 
-            response = Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+            response_data = {
+                "message": "User registered successfully",
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                },
+                "access_token": access_token,
+                "refresh_token": refresh_token,
+            }
+
+            response = Response(response_data, status=status.HTTP_201_CREATED)
 
             response.set_cookie(
                 key='access_token',
